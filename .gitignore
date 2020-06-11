@@ -1,0 +1,93 @@
+#Maven Project File
+target/
+bin/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+
+
+# Eclipse Project file
+.settings/
+.project
+.classpath
+.apt_generated
+.factorypath
+.springBeans
+.sts4-cache
+
+### NetBeans ###
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# Idea Project file
+*.iml
+*.ipr
+*.iws
+.idea
+out
+test-output
+atlassian-ide-plugin.xml
+.gradletasknamecache
+local.properties
+
+
+# SVN 目录
+.svn
+_svn
+
+
+# Flex项目文件
+.externalToolBuilders
+.actionScriptProperties
+.flexProperties
+FlexFormatConfig.properties
+
+
+# Java Files #
+*.jar
+*.war
+*.ear
+*.class
+classes/
+.cache/
+
+
+
+#gradle文件
+.gradle
+build/
+gradle-app.setting
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+
+# 其他文件
+*.log
+*.bak
+build/
+doc/
+.sonar_lock
+
+# 苹果机器的内部管理文件
+*~
+.DS_Store
+
+#web前端不需要提交的文件
+node_modules/
+dist/
+
+#Jenkinsfile
+Jenkinsfile
+/.springBeans
+
+# else
+.springBeans
+/disconf

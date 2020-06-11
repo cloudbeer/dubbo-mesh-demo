@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dubbo
+  labels:
+    istio-injection: enabled
+spec:
+  finalizers:
+    - kubernetes
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: dubbo-proxy
+  namespace: dubbo
+spec:
+  configPatches:
+#    - applyTo: NETWORK_FILTER
+#      match:
+#        context: SIDECAR_OUTBOUND
+#        listener:
+##          name: "10.7.255.146_20880"
+##          port_number: "20880"
+#          filter_chain:
+#            filter:
+#              name: envoy.tcp_proxy
+#      patch:
+#        operation: REMOVE
+    - applyTo: NETWORK_FILTER
+      match:
+        context: SIDECAR_OUTBOUND
+        listener:
+#          name: "10.7.255.146_20880"
+#          port_number: "20880"
+          portNumber: 20880
+          filterChain:
+            filter:
+              name: "mixer"
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.network.dubbo_proxy
+          config:
+#            route_config:
+#              - interface: .*       //使用.*代表所有接口
+#                name: local_route
+#                routes:
+#                  - match:
+#                      method:
+#                        name:
+#                          regex: .*
+#                    route:
+#                      cluster: hello-dubbo-provider.dubbo
+            stat_prefix: dubbo_incomming_stats
+            protocol_type: Dubbo
+            serialization_type: Hessian2
+            dubbo_filters:
+              - name: envoy.filters.dubbo.router
+
+
+#
+#    - applyTo: NETWORK_FILTER # http connection manager is a filter in Envoy
+#      match:
+#        # context omitted so that this applies to both sidecars and gateways
+#        listener:
+#          filterChain:
+#            filter:
+#              name: "envoy.http_connection_manager"
+#      patch:
+#        operation: MERGE
+#        value:
+#          typed_config:
+#            "@type": "type.googleapis.com/envoy.config.filter.network.http_connection_manager.v2.HttpConnectionManager"
+#            idle_timeout: 30s
