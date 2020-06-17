@@ -8,13 +8,13 @@
 
 
     <dubbo:application name="hello-dubbo-provider"/>
-    <dubbo:protocol name="dubbo" port="20880" />
+<!--    <dubbo:protocol name="dubbo" port="20880" />-->
     <dubbo:registry register="false" subscribe="false" check="false" address="none" />
 <!--    <dubbo:registry address="zookeeper://zk.dubbo:2181" client="curator" />-->
     <bean id="demoService" class="tencent.demo.provider.DemoServiceImpl"/>
-    <dubbo:service interface="tencent.demo.DemoService" ref="demoService" />
+    <dubbo:service interface="tencent.demo.DemoService" ref="demoService" protocol="http" />
 
-    <!--    <dubbo:registry address="consul://consul.dubbo:8500"/>-->
-    <!--    <dubbo:protocol id="grpc" name="grpc"/>-->
-    <!--    <dubbo:protocol name="rest" port="8080"/>-->
+<!--    <dubbo:protocol name="http" port="8080" server="jetty" />-->
+    <dubbo:protocol name="http" id="http" port="20880" server="jetty"/>
+
 </beans>

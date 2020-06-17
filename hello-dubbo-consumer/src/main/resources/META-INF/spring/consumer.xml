@@ -8,7 +8,8 @@
     <dubbo:application name="demo-consumer"/>
     <dubbo:registry address="none" register="false" subscribe="false" check="false" />
 <!--    <dubbo:registry address="zookeeper://zk.dubbo:2181" client="curator" />-->
-    <dubbo:reference id="demoService" check="false" interface="tencent.demo.DemoService" url="dubbo://hello-dubbo-provider:20880" />
+<!--    <dubbo:reference id="demoService" check="false" interface="tencent.demo.DemoService" url="dubbo://hello-dubbo-provider:20880" />-->
+    <dubbo:reference id="demoService" check="false" interface="tencent.demo.DemoService" url="http://hello-dubbo-provider:20880" />
 
 <!--    <dubbo:registry address="consul://consul.dubbo:8500"/>-->
 </beans>

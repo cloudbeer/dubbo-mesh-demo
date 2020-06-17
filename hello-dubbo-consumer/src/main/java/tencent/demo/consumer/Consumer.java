@@ -14,9 +14,11 @@ public class Consumer {
         // Executing remote methods
 
         while(true) {
-            String hello = demoService.sayHello("哈哈");
+            String hello = demoService.sayHello("啤酒云");
+            String reject = demoService.sayReject("黑客");
             // Display the call result
             System.out.println(hello);
+            System.out.println(reject);
             Thread.sleep(5 * 1000);
         }
 
