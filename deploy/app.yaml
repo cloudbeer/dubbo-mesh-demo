@@ -10,115 +10,6 @@ spec:
     - kubernetes
 
 ---
-## consul
-#apiVersion: apps/v1beta1
-#kind: Deployment
-#metadata:
-#  name: consul
-#  namespace: dubbo
-#  labels:
-#    app: consul
-#spec:
-#  replicas: 1
-#  template:
-#    metadata:
-#      labels:
-#        app: consul
-#    spec:
-##      affinity:
-##        podAntiAffinity:
-##          requiredDuringSchedulingIgnoredDuringExecution:
-##            - labelSelector:
-##                matchExpressions:
-##                  - key: app
-##                    operator: In
-##                    values:
-##                      - consul
-##              topologyKey: kubernetes.io/hostname
-##      terminationGracePeriodSeconds: 10
-#      containers:
-#        - name: consul
-#          image: consul:1.7.3
-#          args:
-#            - "agent"
-#            - "-dev"
-#            - "-client=0.0.0.0"
-##          env:
-##            - name: PODIP
-##              valueFrom:
-##                fieldRef:
-##                  fieldPath: status.podIP
-##            - name: NAMESPACE
-##              valueFrom:
-##                fieldRef:
-##                  fieldPath: metadata.namespace
-#          ports:
-#            - containerPort: 8500
-#              name: ui-port
-#            - containerPort: 8400
-#              name: alt-port
-#            - containerPort: 53
-#              name: udp-port
-#            - containerPort: 8443
-#              name: https-port
-#            - containerPort: 8080
-#              name: http-port
-#            - containerPort: 8301
-#              name: serflan
-#            - containerPort: 8302
-#              name: serfwan
-#            - containerPort: 8600
-#              name: consuldns
-#            - containerPort: 8300
-#              name: server
-#
-#---
-#apiVersion: v1
-#kind: Service
-#metadata:
-#  name: consul
-#  namespace: dubbo
-#  labels:
-#    name: consul
-#spec:
-#  ports:
-#  - name: http
-#    port: 8500
-#    targetPort: 8500
-#  - name: https
-#    port: 8443
-#    targetPort: 8443
-#  - name: rpc
-#    port: 8400
-#    targetPort: 8400
-#  - name: serflan-tcp
-#    protocol: "TCP"
-#    port: 8301
-#    targetPort: 8301
-#  - name: serflan-udp
-#    protocol: "UDP"
-#    port: 8301
-#    targetPort: 8301
-#  - name: serfwan-tcp
-#    protocol: "TCP"
-#    port: 8302
-#    targetPort: 8302
-#  - name: serfwan-udp
-#    protocol: "UDP"
-#    port: 8302
-#    targetPort: 8302
-#  - name: server
-#    port: 8300
-#    targetPort: 8300
-#  - name: consuldns
-#    port: 8600
-#    targetPort: 8600
-#  selector:
-#    app: consul
-
-
-
----
 # hello-dubbo-provider 服务
 apiVersion: v1
 kind: Service
@@ -129,7 +20,7 @@ metadata:
     name: hello-dubbo-provider
 spec:
   ports:
-  - name: dubbo-rpc
+  - name: dubbo-http-rpc
     protocol: TCP
     port: 20880
     targetPort: 20880
@@ -139,33 +30,33 @@ spec:
 
 ---
 # 部署 hello-dubbo-provider
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: hello-dubbo-provider
-  namespace: dubbo
-  labels:
-    app: hello-dubbo-provider
-    version: v1
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: hello-dubbo-provider
-      version: v1
-  template:
-    metadata:
-      labels:
-        app: hello-dubbo-provider
-        version: v1
-    spec:
-      containers:
-        - name: hello-dubbo-provider
-          image: tencent-cloud-one-docker.pkg.coding.net/xyz-demo/images/hello-dubbo-provider:1.0.4
-          command: ["java","-jar","hello-dubbo-provider-fat.jar"]
-          ports:
-            - containerPort: 20880
-              protocol: TCP
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: hello-dubbo-provider
+#  namespace: dubbo
+#  labels:
+#    app: hello-dubbo-provider
+#    version: v1
+#spec:
+#  replicas: 1
+#  selector:
+#    matchLabels:
+#      app: hello-dubbo-provider
+#      version: v1
+#  template:
+#    metadata:
+#      labels:
+#        app: hello-dubbo-provider
+#        version: v1
+#    spec:
+#      containers:
+#        - name: hello-dubbo-provider
+#          image: tencent-cloud-one-docker.pkg.coding.net/xyz-demo/images/hello-dubbo-provider:1.0.4
+#          command: ["java","-jar","hello-dubbo-provider-fat.jar"]
+#          ports:
+#            - containerPort: 20880
+#              protocol: TCP
 ---
 # 部署 hello-dubbo-provider v2
 apiVersion: apps/v1
@@ -190,7 +81,38 @@ spec:
     spec:
       containers:
         - name: hello-dubbo-provider
-          image: tencent-cloud-one-docker.pkg.coding.net/xyz-demo/images/hello-dubbo-provider:2.0.0
+          image: tencent-cloud-one-docker.pkg.coding.net/xyz-demo/images/hello-dubbo-provider:2.0.0-http
+          command: ["java","-jar","hello-dubbo-provider-fat.jar"]
+          ports:
+            - containerPort: 20880
+              protocol: TCP
+
+---
+
+# 部署 hello-dubbo-provider v3
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dubbo-provider-v3
+  namespace: dubbo
+  labels:
+    app: hello-dubbo-provider
+    version: v3
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: hello-dubbo-provider
+      version: v3
+  template:
+    metadata:
+      labels:
+        app: hello-dubbo-provider
+        version: v3
+    spec:
+      containers:
+        - name: hello-dubbo-provider
+          image: tencent-cloud-one-docker.pkg.coding.net/xyz-demo/images/hello-dubbo-provider:3.0.0-http
           command: ["java","-jar","hello-dubbo-provider-fat.jar"]
           ports:
             - containerPort: 20880
@@ -198,7 +120,7 @@ spec:
 
 
 ---
-# 部署 hello-dubbo-consumer, 没有注入
+# 部署 hello-dubbo-consumer
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -208,7 +130,7 @@ metadata:
     app: hello-dubbo-consumer
     version: v1
 spec:
-  replicas: 10
+  replicas: 1
   selector:
     matchLabels:
       app: hello-dubbo-consumer
@@ -224,84 +146,9 @@ spec:
     spec:
       containers:
         - name: hello-dubbo-consumer
-          image: tencent-cloud-one-docker.pkg.coding.net/xyz-demo/images/hello-dubbo-consumer:1.0.3
+          image: tencent-cloud-one-docker.pkg.coding.net/xyz-demo/images/hello-dubbo-consumer:1.0.3-http
           command: ["java","-jar","hello-dubbo-consumer-fat.jar"]
 
----
-## 部署 hello-dubbo-consumer, 注入
-#apiVersion: apps/v1
-#kind: Deployment
-#metadata:
-#  name: hello-dubbo-consumer
-#  namespace: xyz
-#  labels:
-#    app: hello-dubbo-consumer
-#    version: v1
-#spec:
-#  replicas: 1
-#  selector:
-#    matchLabels:
-#      app: hello-dubbo-consumer
-#      version: v1
-#  template:
-#    metadata:
-#      annotations:
-#        traffic.sidecar.istio.io/excludeOutboundPorts: "20880"
-#        traffic.sidecar.istio.io/excludeInboundPorts: "20880"
-#      labels:
-#        app: hello-dubbo-consumer
-#        version: v1
-#    spec:
-#      containers:
-#        - name: hello-dubbo-consumer
-#          image: tencent-cloud-one-docker.pkg.coding.net/xyz-demo/images/hello-dubbo-consumer:1.0.1
-#          command: ["java","-jar","hello-dubbo-consumer-fat.jar"]
-
-#---
-## 部署 zk 测试
-#apiVersion: apps/v1beta1
-#kind: Deployment
-#metadata:
-#  name: zk
-#  namespace: dubbo
-#  labels:
-#    app: zk
-#spec:
-#  replicas: 1
-#  template:
-#    metadata:
-#      labels:
-#        app: zk
-#    spec:
-#      containers:
-#        - name: zk
-#          image: zookeeper:3.6.1
-#          ports:
-#            - containerPort: 2181
-#              name: client
-#            - containerPort: 2888
-#              name: server
-#            - containerPort: 3888
-#              name: leader-election
-#
-#---
-#apiVersion: v1
-#kind: Service
-#metadata:
-#  name: zk
-#  namespace: dubbo
-#  labels:
-#    name: zk
-#spec:
-#  ports:
-#    - port: 2181
-#      name: client
-#    - port: 2888
-#      name: server
-#    - port: 3888
-#      name: leader-election
-#  selector:
-#    app: zk
 
 
 ---
@@ -314,22 +161,24 @@ metadata:
 spec:
   hosts:
     - hello-dubbo-provider
-  tcp:
-    - route:
-        - destination:
-            host: hello-dubbo-provider
-            port:
-              number: 20880
-            subset: v1
-          weight: 1
-        - destination:
-            host: hello-dubbo-provider
-            port:
-              number: 20880
-            subset: v2
-          weight: 99
+  http:
+  - match:
+    - uri:
+      prefix: "/123"
+    route:
+      - destination:
+          host: hello-dubbo-provider
+          port:
+            number: 20880
+          subset: v3
+  - route:
+    - destination:
+        host: hello-dubbo-provider
+        port:
+          number: 20880
+        subset: v2
 ---
-## 定义目标版本
+### 定义目标版本
 
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
@@ -339,9 +188,9 @@ metadata:
 spec:
   host: hello-dubbo-provider
   subsets:
-    - name: v1
-      labels:
-        version: v1
     - name: v2
       labels:
         version: v2
+    - name: v3
+      labels:
+        version: v3
