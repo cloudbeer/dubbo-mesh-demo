@@ -3,6 +3,16 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: dubbo
+spec:
+  finalizers:
+    - kubernetes
+
+# 创建命名空间，有 sidecar 注入
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dubbo-mesh
   labels:
     istio-injection: enabled
 spec:
@@ -208,7 +218,7 @@ metadata:
     app: hello-dubbo-consumer
     version: v1
 spec:
-  replicas: 10
+  replicas: 2
   selector:
     matchLabels:
       app: hello-dubbo-consumer
@@ -222,6 +232,7 @@ spec:
         app: hello-dubbo-consumer
         version: v1
     spec:
+      restartPolicy: Always
       containers:
         - name: hello-dubbo-consumer
           image: tencent-cloud-one-docker.pkg.coding.net/xyz-demo/images/hello-dubbo-consumer:1.0.3
@@ -321,13 +332,13 @@ spec:
             port:
               number: 20880
             subset: v1
-          weight: 1
+          weight: 30
         - destination:
             host: hello-dubbo-provider
             port:
               number: 20880
             subset: v2
-          weight: 99
+          weight: 70
 ---
 ## 定义目标版本
 

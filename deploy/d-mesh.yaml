@@ -1,0 +1,113 @@
+# 创建命名空间，有 sidecar 注入
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dubbo-mesh
+  labels:
+    istio-injection: enabled
+spec:
+  finalizers:
+    - kubernetes
+
+
+---
+# hello-dubbo-provider 服务
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-dubbo-provider
+  namespace: dubbo-mesh
+  labels:
+    name: hello-dubbo-provider
+spec:
+  ports:
+  - name: dubbo-rpc
+    protocol: TCP
+    port: 20880
+    targetPort: 20880
+  selector:
+    app: hello-dubbo-provider
+
+
+---
+# 部署 hello-dubbo-provider 应用，有sidecar
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dubbo-provider
+  namespace: dubbo-mesh
+  labels:
+    app: hello-dubbo-provider
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello-dubbo-provider
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: hello-dubbo-provider
+        version: v1
+    spec:
+      containers:
+        - name: hello-dubbo-provider
+          image: tencent-cloud-one-docker.pkg.coding.net/xyz-demo/images/hello-dubbo-provider:2.0.1
+          command: ["java","-jar","hello-dubbo-provider-fat.jar"]
+          env:
+            - name: ns
+              value: "dubbo-mesh"
+          ports:
+            - containerPort: 20880
+              protocol: TCP
+
+---
+# 动态配置，将接口和服务的映射放入 ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: services-list
+  namespace: dubbo-mesh
+data:
+  services: |-
+    tencent.demo.DemoService=dubbo://hello-dubbo-provider:20880
+---
+# 部署 hello-dubbo-consumer, 有 sidecar
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dubbo-consumer
+  namespace: dubbo-mesh
+  labels:
+    app: hello-dubbo-consumer
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello-dubbo-consumer
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: hello-dubbo-consumer
+        version: v1
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: hello-dubbo-consumer
+          image: tencent-cloud-one-docker.pkg.coding.net/xyz-demo/images/hello-dubbo-consumer:1.0.4
+          command: ["java","-jar","-Ddubbo.resolve.file=services.properties", "hello-dubbo-consumer-fat.jar"]
+          volumeMounts:
+            - name: services-conf
+              mountPath: /app/services.properties
+              subPath: services.properties
+      volumes:
+          - name: services-conf
+            configMap:
+              name: services-list
+              items:
+                - key: services
+                  path: services.properties
+

@@ -1,0 +1,110 @@
+# 创建命名空间，无 sidecar 注入
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dubbo
+spec:
+  finalizers:
+    - kubernetes
+
+---
+# 在 dubbo 中部署 zk
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: zk
+  namespace: dubbo
+  labels:
+    app: zk
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: zk
+    spec:
+      containers:
+        - name: zk
+          image: zookeeper:3.6.1
+          ports:
+            - containerPort: 2181
+              name: client
+---
+# 通过 service 连接 zk
+apiVersion: v1
+kind: Service
+metadata:
+  name: zk
+  namespace: dubbo
+  labels:
+    name: zk
+spec:
+  ports:
+  - name: client
+    port: 2181
+    targetPort: 2181
+  selector:
+    app: zk
+---
+# 在 dubbo 中的 provider
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dubbo-provider
+  namespace: dubbo
+  labels:
+    app: hello-dubbo-provider
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello-dubbo-provider
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: hello-dubbo-provider
+        version: v1
+    spec:
+      containers:
+        - name: hello-dubbo-provider
+          image: tencent-cloud-one-docker.pkg.coding.net/xyz-demo/images/hello-dubbo-provider:2.0.1
+          command: ["java","-jar","hello-dubbo-provider-fat.jar"]
+          env:
+            - name: ns
+              value: "dubbo"
+          ports:
+            - containerPort: 20880
+              protocol: TCP
+
+---
+# 部署 hello-dubbo-consumer, 没有 sidecar
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dubbo-consumer
+  namespace: dubbo
+  labels:
+    app: hello-dubbo-consumer
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello-dubbo-consumer
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: hello-dubbo-consumer
+        version: v1
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: hello-dubbo-consumer
+          image: tencent-cloud-one-docker.pkg.coding.net/xyz-demo/images/hello-dubbo-consumer:1.0.4
+          command: ["java","-jar","hello-dubbo-consumer-fat.jar"]
+          ports:
+            - containerPort: 20880
+              protocol: TCP

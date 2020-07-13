@@ -14,9 +14,13 @@ public class Consumer {
         // Executing remote methods
 
         while(true) {
-            String hello = demoService.sayHello("哈哈");
-            // Display the call result
-            System.out.println(hello);
+            try {
+                String hello = demoService.sayHello("哈哈");
+                // Display the call result
+                System.out.println(hello);
+            }catch (Exception ex){
+                System.out.println("Provider 未准备好，等待吧。");
+            }
             Thread.sleep(5 * 1000);
         }
 
