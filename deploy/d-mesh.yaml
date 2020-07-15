@@ -29,6 +29,7 @@ spec:
     app: hello-dubbo-provider
 
 
+
 ---
 # 部署 hello-dubbo-provider 应用，有sidecar
 apiVersion: apps/v1
@@ -38,18 +39,18 @@ metadata:
   namespace: dubbo-mesh
   labels:
     app: hello-dubbo-provider
-    version: v1
+    version: v1-mesh
 spec:
   replicas: 2
   selector:
     matchLabels:
       app: hello-dubbo-provider
-      version: v1
+      version: v1-mesh
   template:
     metadata:
       labels:
         app: hello-dubbo-provider
-        version: v1
+        version: v1-mesh
     spec:
       containers:
         - name: hello-dubbo-provider
@@ -81,18 +82,20 @@ metadata:
   namespace: dubbo-mesh
   labels:
     app: hello-dubbo-consumer
-    version: v1
+    version: v1-mesh
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: hello-dubbo-consumer
-      version: v1
+      version: v1-mesh
   template:
     metadata:
+      annotations:
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: "10.0.50.0/24,172.24.2.0/24,172.24.1.0/24,172.24.0.0/24"
       labels:
         app: hello-dubbo-consumer
-        version: v1
+        version: v1-mesh
     spec:
       restartPolicy: Always
       containers:

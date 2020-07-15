@@ -24,9 +24,6 @@ public class DemoServiceImpl implements DemoService {
         }
 
 
-//        Date date = new Date();
-//        DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-//        String str = format.format(date);
         return "你好：" + name + ", V2 来自 " + namespace + " 空间 @ " + myHost;
     }
 }
