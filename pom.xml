@@ -16,7 +16,7 @@
 
     <properties>
         <grpc.version>1.29.0</grpc.version>
-        <dubbo.version>2.7.6</dubbo.version>
+        <dubbo.version>2.7.15</dubbo.version>
     </properties>
 
     <dependencies>
